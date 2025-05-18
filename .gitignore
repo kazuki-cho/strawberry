@@ -1,0 +1,62 @@
+# Node.js and npm
+node_modules/
+npm-debug.log*
+yarn-error.log
+package-lock.json # チーム開発でバージョンを固定したい場合は含めないこともあります
+
+# Vite
+dist/
+.vite/
+coverage/
+
+# Supabase (ローカル開発用の一時ファイルなど)
+.supabase/ # Supabase CLIが生成するローカル開発用の設定やデータ
+# ただし、supabase/migrations はバージョン管理に含めるのが一般的です。
+# 今回の構成では strawberry/frontend/project/supabase/migrations を
+# バージョン管理しているので、これは除外しません。
+
+# OS generated files
+.DS_Store
+Thumbs.db
+.Spotlight-V100
+.Trashes
+
+# IDE and editor directories
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Environment variables
+.env
+.env*.local
+.env.*.local
+
+# Build output
+build/
+
+# Log files
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional stylelint cache
+.stylelintcache
+
+# Optional Prettier cache
+.prettiercache
+
+# TypeScript cache
+*.tsbuildinfo
