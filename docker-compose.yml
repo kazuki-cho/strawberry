@@ -3,7 +3,13 @@ version: '3.8'
 services:
   frontend:
     build:
-      context: .
-      dockerfile: frontend/Dockerfile
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: frontend-app
+    working_dir: /app/project
     ports:
-      - "80:80"
+      - "5173:5173"
+    volumes:
+      - ./frontend/project:/app/project:cached
+      - /app/project/node_modules
+

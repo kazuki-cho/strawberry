@@ -1,9 +1,7 @@
-FROM node:18-alpine AS build
-WORKDIR /app
-COPY frontend/project/package.json ./
+FROM node:18-alpine
+WORKDIR /app/project
+COPY ./project/package*.json ./
 RUN npm install
-COPY frontend/project/ ./
-RUN npm run build
-
-FROM nginx:alpine
-COPY --from=build /app/dist /usr/share/nginx/html
+COPY ./project .
+EXPOSE 5173
+CMD ["npx", "vite", "--host"]
