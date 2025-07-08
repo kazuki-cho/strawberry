@@ -1,4 +1,20 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Typography,
+  CircularProgress,
+  Alert,
+  Box,
+  Pagination,
+  Button
+} from '@mui/material';
 
 type Employee = {
   id: string;
@@ -19,6 +35,7 @@ type ApiResponse = {
 const PAGE_SIZE = 5;
 
 const EmployeeList: React.FC = () => {
+  const navigate = useNavigate();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -31,7 +48,7 @@ const EmployeeList: React.FC = () => {
     try {
       const offset = (page - 1) * PAGE_SIZE;
       const res = await fetch(`http://localhost:5001/api/employees?limit=${PAGE_SIZE}&offset=${offset}`);
-      if (!res.ok) throw new Error('API error');
+      if (!res.ok) throw new Error('APIからのデータ取得に失敗しました。');
       const data: ApiResponse = await res.json();
       setEmployees(data.employees);
       setTotal(data.total);
@@ -48,55 +65,77 @@ const EmployeeList: React.FC = () => {
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
+  const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
+    setPage(value);
+  };
+
   return (
-    <div>
-      <h2 className="text-xl font-bold mb-4">従業員一覧</h2>
-      {loading && <div>読み込み中...</div>}
-      {error && <div className="text-red-500">{error}</div>}
-      <table className="min-w-full border mb-4">
-        <thead>
-          <tr className="bg-gray-100">
-            <th className="border px-2 py-1">社員番号</th>
-            <th className="border px-2 py-1">氏名</th>
-            <th className="border px-2 py-1">メール</th>
-            <th className="border px-2 py-1">部署</th>
-            <th className="border px-2 py-1">役職</th>
-            <th className="border px-2 py-1">入社日</th>
-          </tr>
-        </thead>
-        <tbody>
-          {employees.map(emp => (
-            <tr key={emp.id} className="hover:bg-gray-50">
-              <td className="border px-2 py-1">{emp.employee_code}</td>
-              <td className="border px-2 py-1">{emp.last_name} {emp.first_name}</td>
-              <td className="border px-2 py-1">{emp.email}</td>
-              <td className="border px-2 py-1">{emp.department}</td>
-              <td className="border px-2 py-1">{emp.position}</td>
-              <td className="border px-2 py-1">{emp.hire_date || '-'}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <div className="flex gap-2 items-center">
-        <button
-          className="px-2 py-1 border rounded disabled:opacity-50"
-          onClick={() => setPage(p => Math.max(1, p - 1))}
-          disabled={page === 1}
-        >
-          前へ
-        </button>
-        <span>
-          {page} / {totalPages}
-        </span>
-        <button
-          className="px-2 py-1 border rounded disabled:opacity-50"
-          onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-          disabled={page === totalPages || totalPages === 0}
-        >
-          次へ
-        </button>
-      </div>
-    </div>
+    <Box sx={{ width: '100%' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="h4" component="h2">
+          従業員一覧
+        </Typography>
+        <Button variant="outlined" onClick={() => navigate('/')}>
+          ダッシュボードへ戻る
+        </Button>
+      </Box>
+
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+
+      <TableContainer component={Paper}>
+        <Table sx={{ minWidth: 650 }} aria-label="simple table">
+          <TableHead sx={{ backgroundColor: (theme) => theme.palette.grey[100] }}>
+            <TableRow>
+              <TableCell>社員番号</TableCell>
+              <TableCell>氏名</TableCell>
+              <TableCell>メール</TableCell>
+              <TableCell>部署</TableCell>
+              <TableCell>役職</TableCell>
+              <TableCell>入社日</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
+                  <CircularProgress />
+                </TableCell>
+              </TableRow>
+            ) : (
+              employees.map((emp) => (
+                <TableRow
+                  key={emp.id}
+                  hover
+                  onClick={() => navigate(`/employees/${emp.id}`)}
+                  sx={{ cursor: 'pointer', '&:last-child td, &:last-child th': { border: 0 } }}
+                >
+                  <TableCell component="th" scope="row">
+                    {emp.employee_code}
+                  </TableCell>
+                  <TableCell>{emp.last_name} {emp.first_name}</TableCell>
+                  <TableCell>{emp.email}</TableCell>
+                  <TableCell>{emp.department}</TableCell>
+                  <TableCell>{emp.position}</TableCell>
+                  <TableCell>{emp.hire_date ? new Date(emp.hire_date).toLocaleDateString() : '-'}</TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      {!loading && !error && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+          <Pagination
+            count={totalPages}
+            page={page}
+            onChange={handlePageChange}
+            color="primary"
+            disabled={totalPages === 0}
+          />
+        </Box>
+      )}
+    </Box>
   );
 };
 

@@ -26,3 +26,38 @@ INSERT INTO employees (user_id, employee_code, first_name, last_name, email, pas
   (gen_random_uuid(), 'E008', '由美', '中村', 'yumi.nakamura@example.com', 'dummyhash8', '人事', '一般', '2021-11-18', '東京都世田谷区8-8-8', '090-8888-8888'),
   (gen_random_uuid(), 'E009', '翔太', '小林', 'shota.kobayashi@example.com', 'dummyhash9', '開発', '主任', '2019-12-25', '東京都大田区9-9-9', '090-9999-9999'),
   (gen_random_uuid(), 'E010', '恵', '加藤', 'megumi.kato@example.com', 'dummyhash10', '営業', 'リーダー', '2016-02-14', '東京都墨田区10-10-10', '090-1010-1010');
+
+-- 給与設定テーブル
+CREATE TABLE IF NOT EXISTS employee_salary_settings (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    employee_id uuid UNIQUE NOT NULL REFERENCES employees(id),
+    base_salary integer NOT NULL DEFAULT 0, -- 基本給
+    allowances jsonb, -- 各種手当（例: {"housing": 30000, "transportation": 10000}）
+    deductions jsonb, -- 控除（例: {"rent": 50000}）
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+-- 給与履歴テーブル
+CREATE TABLE IF NOT EXISTS salary_records (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    employee_id uuid NOT NULL REFERENCES employees(id),
+    year_month date NOT NULL, -- 対象年月 (例: 2025-07-01)
+    gross_salary integer NOT NULL, -- 総支給額
+    net_salary integer NOT NULL, -- 手取り額
+    details jsonb, -- 給与計算の詳細（基本給、手当、控除、税金など）
+    calculation_date timestamptz NOT NULL DEFAULT now(),
+    UNIQUE(employee_id, year_month)
+);
+
+-- 給与履歴のダミーデータ
+-- E001 山田太郎
+INSERT INTO salary_records (employee_id, year_month, gross_salary, net_salary, details) VALUES
+((SELECT id FROM employees WHERE employee_code = 'E001'), '2024-05-01', 300000, 250000, '{"type": "salary", "base": 280000, "overtime": 20000}'),
+((SELECT id FROM employees WHERE employee_code = 'E001'), '2024-06-01', 310000, 260000, '{"type": "salary", "base": 280000, "overtime": 30000}'),
+((SELECT id FROM employees WHERE employee_code = 'E001'), '2024-06-15', 150000, 120000, '{"type": "bonus", "reason": "Summer Bonus"}');
+
+-- E002 佐藤花子
+INSERT INTO salary_records (employee_id, year_month, gross_salary, net_salary, details) VALUES
+((SELECT id FROM employees WHERE employee_code = 'E002'), '2024-05-01', 280000, 230000, '{"type": "salary", "base": 280000, "overtime": 0}'),
+((SELECT id FROM employees WHERE employee_code = 'E002'), '2024-06-01', 280000, 230000, '{"type": "salary", "base": 280000, "overtime": 0}');
