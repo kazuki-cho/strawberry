@@ -23,7 +23,8 @@ services:
     volumes:
       - ./backend:/app
     depends_on:
-      - db
+      db:
+        condition: service_healthy
   db:
     image: postgres:16-alpine
     environment:
@@ -35,6 +36,11 @@ services:
     volumes:
       - db-data:/var/lib/postgresql/data
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U strawberry -d strawberry"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 volumes:
   db-data:
 

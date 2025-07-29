@@ -56,8 +56,10 @@ const SalaryDetailPage: React.FC = () => {
     <Paper sx={{ p: 4, maxWidth: 800, margin: 'auto' }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h4">給与明細</Typography>
-        <Button variant="outlined" onClick={() => navigate('/salary')}>一覧へ戻る</Button>
-        <Button variant="contained" onClick={() => navigate(`/salary/${id}/edit`)} sx={{ ml: 1 }}>編集</Button>
+        <Box>
+          <Button variant="outlined" onClick={() => navigate('/salary')}>給与履歴へ戻る</Button>
+          <Button variant="contained" onClick={() => navigate(`/salary/${id}/edit`)} sx={{ ml: 1 }}>編集</Button>
+        </Box>
       </Box>
       
       <Grid container spacing={2} sx={{ mb: 3 }}>
